@@ -85,6 +85,26 @@
   .industrial-bg {
     opacity: 0.1;
   }
+  /* 说明区样式（优化 UI） */
+  #explanation{
+    background: linear-gradient(180deg, rgba(250,250,252,1), #fff);
+    margin:24px auto 48px; padding:22px 26px; border-radius:12px; max-width:1100px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.06); color:#1f2937; line-height:1.6; font-size:15px;
+  }
+  #explanation .ex-hero{display:flex;gap:14px;align-items:flex-start}
+  #explanation .ex-hero .ex-icon{font-size:34px;line-height:1}
+  #explanation .ex-hero .ex-title{font-size:18px;font-weight:700;color:#0f172a;margin:0}
+  #explanation .ex-hero .ex-sub{color:#374151;margin:6px 0 0}
+  #explanation h4{margin:14px 0 8px;color:#0b66c2;font-size:16px}
+  #explanation .ex-grid{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:900px){#explanation .ex-grid{grid-template-columns:1fr 1fr}}
+  #explanation .callout{border-left:4px solid #e6f2ff;background:linear-gradient(90deg, rgba(240,247,255,0.6), rgba(255,255,255,0.4));padding:12px 14px;border-radius:8px}
+  #explanation .callout.industrial{border-left-color:#dbeafe}
+  #explanation .callout.kond{border-left-color:#bdecef}
+  #explanation .callout.warning{border-left-color:#fee2e2;background:linear-gradient(90deg,#fff7f7,#fff)}
+  #explanation ul.ex-list{padding-left:18px;margin:8px 0}
+  #explanation .meta{color:#6b7280;font-size:13px;margin-top:8px}
+  #explanation .anchor-link{display:inline-block;margin-left:8px;color:#0b66c2;text-decoration:none}
 </style>
 </head>
 <body>
@@ -632,19 +652,88 @@
   updateVisibility();
 })();
 </script>
-<!-- 页面说明：帮助用户理解图表内容 -->
-<section id="explanation" style="background:#fff;margin:20px auto;padding:24px;border-radius:10px;max-width:1100px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:15px;color:#222;">
-  <h3 style="margin-top:0;">关于本图</h3>
-  <p>本页面通过时间轴与多层可视化，展示 1400–2025 年间的长期经济周期（康波）、主要工业革命阶段、国家与文明的兴衰、重要战争/危机，以及具有代表性的科技事件与科学家。</p>
-  <ul>
-    <li><strong>康波周期</strong>（曲线）：表示长期经济波动，约 40–60 年为一周期。</li>
-    <li><strong>工业革命</strong>（蓝色背景与边界线）：展示技术与生产力跃迁对社会经济的长期影响。</li>
-    <li><strong>国家 / 文明曲线</strong>：用弧线表达各国或文明的兴起与衰落；将鼠标悬停在弧线上可查看详细信息。</li>
-    <li><strong>战争 / 危机 / 事件</strong>：矩形与圆点标记历史事件，悬停显示注释与详细信息。</li>
-    <li><strong>科学家（星形）</strong>：代表在对应时期具有重要影响的科学家，星形大小表示影响力。</li>
-  </ul>
-  <p>使用提示：页面顶部的图例可用于开关不同图层；将鼠标移到元素上可查看说明。此图用于宏观展示历史技术—经济—政治演化关系，供学习与讨论参考，不代表详尽或最终的历史结论。</p>
-  <p style="margin-bottom:0;">如需更新或提出建议，请在仓库中发起 issue 或联系维护者。</p>
+<!-- 页面说明（优化后） -->
+<section id="explanation">
+  <div class="ex-hero">
+    <div class="ex-icon">🚀</div>
+    <div>
+      <h3 class="ex-title">世界周期律与未来投资地图：一份基于宏观图景的战略解读</h3>
+      <div class="ex-sub">你眼前的这张图，是历史学家、经济学家和技术架构师共同关注的“世界运行底层代码”的可视化，用于预测未来趋势并指导战略布局。</div>
+    </div>
+  </div>
+
+  <div class="ex-grid" style="margin-top:14px">
+    <div>
+      <h4>I. ⏳ 时间与系统的框架（横轴、战争与危机）</h4>
+      <div class="callout kond">
+        <strong>1. 🕰 时间轴（横轴）</strong>
+        <div class="meta">技术分析：横轴是线性时间，但事件密度呈非线性分布；高密度区（如 1914-1945，1990-2010）是系统重组的关键期。</div>
+        <ul class="ex-list">
+          <li>策略启示：关注高密度期，常伴随监管空白与需求井喷，是颠覆性创新的窗口。</li>
+        </ul>
+      </div>
+      <div style="height:10px"></div>
+      <div class="callout warning">
+        <strong>2. ⚔️ 战争与危机</strong>
+        <div class="meta">灰色（战争）与红色（危机）矩形通常出现在康波低谷与国家权力交接期，代表系统重置与资源再分配。</div>
+        <ul class="ex-list">
+          <li>经济危机：带来“创造性破坏”，推动资本与人才流向下一代核心技术。</li>
+          <li>战争：以规则重写与资源再分配的方式改写全球秩序。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div>
+      <h4>II. 💡 驱动周期的核心引擎（经济波浪与工业革命）</h4>
+      <div class="callout industrial">
+        <strong>3. 🌊 经济波浪线（青色）</strong>
+        <div class="meta">康波分阶段运行；当前处于第五康波尾部，向第六康波（AI/生物/绿色能源）过渡。</div>
+        <ul class="ex-list">
+          <li>波峰：适合应用层创新与商业模式扩张。</li>
+          <li>波谷：适合底层技术研发与基础设施投入，常孕育未来的伟大公司。</li>
+        </ul>
+      </div>
+      <div style="height:10px"></div>
+      <div class="callout">
+        <strong>4. ⚙️ 工业革命与技术火种（蓝色区域 + 金色星星）</strong>
+        <div class="meta">蓝色区域代表技术范式，金色星形为科学家的技术奇点；这些元素常预示着周期的启动与放大。</div>
+        <ul class="ex-list">
+          <li>投资方向：从“连接人”转向“连接数据与机器”（工业互联网、边缘计算、AI Agent）。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px">
+    <h4>III. 👑 权力与趋势的交织（国家曲线与联系线）</h4>
+    <div class="callout">
+      <strong>5. 👑 国家权力曲线（彩色）</strong>
+      <div class="meta">国家巅峰与对当期工业革命技术的垄断与输出能力密切相关；交接期意味着生态与标准重写。</div>
+      <ul class="ex-list">
+        <li>策略启示：把握技术标准与供应链重构的机会。</li>
+      </ul>
+    </div>
+    <div style="height:10px"></div>
+    <div class="callout">
+      <strong>6. 🔗 事件联系线</strong>
+      <div class="meta">关注“星→技术事件→康波波峰”的路径以及波谷触发的危机/战争链条，这些链条体现历史的网状因果关系。</div>
+      <ul class="ex-list">
+        <li>架构思考：项目需具备“韧性”并能快速适应技术范式转移。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top:14px" class="callout">
+    <h4>IV. 总结：掌握周期，布局未来</h4>
+    <p class="meta">这是一张高度抽象的系统工程图：周期性技术革命积累势能，在危机中释放并完成权力与财富重分配。</p>
+    <ul class="ex-list">
+      <li><strong>定位：</strong>我们正处于 K5 尾声，K6 黎明 的关键期。</li>
+      <li><strong>方向：</strong>K6 主战场：AI 基础设施、生命科学、碳中和技术。</li>
+      <li><strong>行动：</strong>聚焦底层技术研发与工程化应用，争取在下一个 50 年周期中跃升。</li>
+    </ul>
+    <p class="meta" style="margin-bottom:0">如需改写语气、增加引用或缩短摘要，我可以做进一步调整。</p>
+  </div>
+
 </section>
 </body>
 </html>
