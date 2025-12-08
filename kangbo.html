@@ -105,6 +105,9 @@
   #explanation ul.ex-list{padding-left:18px;margin:8px 0}
   #explanation .meta{color:#6b7280;font-size:13px;margin-top:8px}
   #explanation .anchor-link{display:inline-block;margin-left:8px;color:#0b66c2;text-decoration:none}
+  /* 关于按钮样式 */
+  #about-btn{position:fixed;right:18px;top:74px;background:#0b66c2;color:#fff;border:none;padding:8px 12px;border-radius:8px;box-shadow:0 6px 18px rgba(11,102,194,0.18);cursor:pointer;z-index:40}
+  @media(max-width:640px){#about-btn{right:12px;top:76px;padding:8px 10px;font-size:14px}}
 </style>
 </head>
 <body>
@@ -141,6 +144,8 @@
     <div class="legend-color" style="background:teal; border: none;"></div>康波周期曲线
   </div>
 </div>
+<!-- 顶部关于按钮 -->
+<button id="about-btn" aria-label="关于本图" title="关于本图">关于</button>
 <div id="chart"></div>
 <div class="tooltip" id="tooltip" style="opacity:0;"></div>
 <script>
@@ -654,6 +659,11 @@
 </script>
 <!-- 页面说明（优化后） -->
 <section id="explanation">
+  <div id="ex-summary" style="margin-bottom:12px">
+    <p style="margin:0;color:#374151;">摘要：本图为宏观周期分析地图，揭示技术—经济—权力的长期演化规律，便于战略判断与研究。</p>
+    <a href="#" id="ex-toggle" style="color:#0b66c2;margin-left:8px;text-decoration:none">展开全文</a>
+  </div>
+  <div id="ex-full" style="display:none">
   <div class="ex-hero">
     <div class="ex-icon">🚀</div>
     <div>
@@ -734,7 +744,53 @@
     <p class="meta" style="margin-bottom:0">如需改写语气、增加引用或缩短摘要，我可以做进一步调整。</p>
   </div>
 
+  </div>
 </section>
+<script>
+// 关于按钮、折叠说明与平滑滚动
+(function(){
+  const aboutBtn = document.getElementById('about-btn');
+  const exSection = document.getElementById('explanation');
+  const exToggle = document.getElementById('ex-toggle');
+  const exFull = document.getElementById('ex-full');
+
+  function smoothScrollTo(el){
+    const offset = 20; // 少量顶部间距
+    const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({top, behavior:'smooth'});
+  }
+
+  aboutBtn.addEventListener('click', ()=>{
+    // 展开并滚动
+    if(exFull.style.display === 'none') {
+      exFull.style.display = 'block';
+      exToggle.textContent = '收起全文';
+    }
+    smoothScrollTo(exSection);
+  });
+
+  exToggle.addEventListener('click', (e)=>{
+    e.preventDefault();
+    if(exFull.style.display === 'none'){
+      exFull.style.display = 'block';
+      exToggle.textContent = '收起全文';
+    } else {
+      exFull.style.display = 'none';
+      exToggle.textContent = '展开全文';
+      smoothScrollTo(exSection);
+    }
+  });
+
+  // 移动端：当屏幕宽度小于 640 时，让 summary 可点击以展开
+  if(window.matchMedia && window.matchMedia('(max-width:640px)').matches){
+    document.getElementById('ex-summary').addEventListener('click', ()=>{
+      if(exFull.style.display === 'none'){
+        exFull.style.display = 'block'; exToggle.textContent='收起全文';
+      }
+    });
+  }
+})();
+</script>
 </body>
 </html>
 
