@@ -37,8 +37,18 @@
     .pill{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted)}
 
     /* 回到顶部悬浮按钮 */
-    .to-top{position:fixed;right:18px;bottom:18px;width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(88,166,255,0.08);color:var(--accent);border:1px solid rgba(255,255,255,0.04);cursor:pointer;box-shadow:0 6px 18px rgba(2,6,23,0.6);backdrop-filter:blur(6px);transition:transform .12s ease,opacity .12s ease;z-index:1000}
-    .to-top svg{width:18px;height:18px}
+    .to-top{position:fixed;right:18px;bottom:18px;width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#58a6ff 0%,#d977fa 100%);color:#fff;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(2,6,23,0.7);backdrop-filter:blur(8px);transition:transform .18s cubic-bezier(.4,2,.3,1),opacity .18s;z-index:1000;opacity:0.92;animation:toTopPulse 2.2s infinite cubic-bezier(.4,2,.3,1)}
+    .to-top svg{width:28px;height:28px;display:block}
+    @keyframes toTopPulse {
+      0%{transform:scale(1)}
+      10%{transform:scale(1.08)}
+      20%{transform:scale(0.98)}
+      30%{transform:scale(1.12)}
+      40%{transform:scale(0.96)}
+      50%{transform:scale(1.08)}
+      60%{transform:scale(1)}
+      100%{transform:scale(1)}
+    }
 
     aside{position:relative}
     .panel{position:sticky;top:20px;padding:12px;border-radius:12px;background-color:var(--card);border:1px solid rgba(255,255,255,0.03)}
@@ -120,8 +130,15 @@
 
   <!-- 回到顶部悬浮按钮 -->
   <button id="toTop" class="to-top" aria-label="回到顶部" title="回到顶部" type="button" style="display:none">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M12 8l4 4H8l4-4z" fill="currentColor" />
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden>
+      <defs>
+        <linearGradient id="arrowGrad" x1="0" y1="32" x2="32" y2="0" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#58a6ff"/>
+          <stop offset="1" stop-color="#d977fa"/>
+        </linearGradient>
+      </defs>
+      <path d="M16 8 L16 24" stroke="url(#arrowGrad)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M10 14 L16 8 L22 14" stroke="url(#arrowGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
 
@@ -255,7 +272,26 @@
       // 初始检查
       toggle();
       btn.addEventListener('click', ()=>{
-        window.scrollTo({top:0,behavior:'smooth'});
+        // 炫彩弹跳动感滚动
+        const start = window.scrollY;
+        const duration = 900;
+        const bounce = t => {
+          // easeOutBounce
+          if (t < 1/2.75) return 7.5625*t*t;
+          else if (t < 2/2.75) return 7.5625*(t-=1.5/2.75)*t+0.75;
+          else if (t < 2.5/2.75) return 7.5625*(t-=2.25/2.75)*t+0.9375;
+          else return 7.5625*(t-=2.625/2.75)*t+0.984375;
+        };
+        let startTime;
+        function animateScroll(ts){
+          if(!startTime) startTime=ts;
+          const elapsed = ts-startTime;
+          const progress = Math.min(elapsed/duration,1);
+          const bounceProgress = 1-bounce(progress);
+          window.scrollTo(0, start*bounceProgress);
+          if(progress<1) requestAnimationFrame(animateScroll);
+        }
+        requestAnimationFrame(animateScroll);
       });
     })();
   </script>
