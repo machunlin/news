@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>康波周期+全球霸权+工业革命+科学家全景图（文明之光版）</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; background: #f8f8f8; margin:0; padding:0;}
+  #chart { background: white; margin: 10px auto; width: 98vw; height: 1400px; position: relative;}
+  svg { display: block; margin: auto; background: white; box-shadow: 0 0 5px rgba(0,0,0,0.1);}
+  .tooltip {
+    position: absolute; background: rgba(0,0,0,0.9); color: white;
+    padding: 12px; border-radius: 8px; pointer-events: none; font-size: 14px;
+    max-width: 350px; z-index: 10; line-height: 1.5;
+  }
+  .nation-path.major { stroke-width: 12; opacity: 0.85; cursor: pointer;}
+  .nation-path.minor { stroke-width: 6; opacity: 0.65; cursor: pointer;}
+  .event-circle, .scientist-star, .industrial-rect, .culture-circle, .war-rect, .crisis-rect {
+    cursor: pointer;
+  }
+  .war-rect {
+    opacity: 0.7;
+  }
+  .crisis-rect {
+    opacity: 0.8;
+    rx: 5;
+    ry: 5;
+  }
+  .legend {
+    font-size: 14px; user-select:none;
+    background: #fff; border: 1px solid #ccc; padding: 12px 16px; border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; z-index: 20;
+    max-width: 92%;
+  }
+  .legend-item {
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+  }
+  .legend-color {
+    width: 20px; height: 20px; border-radius: 4px;
+    border: 1px solid #999;
+  }
+  .legend-item.disabled .legend-color {
+    opacity: 0.3;
+  }
+  .legend-color.major { border-width: 2px; }
+  text.axis-label {
+    font-size: 14px; fill: #333;
+  }
+  h2 {
+    text-align:center; margin:10px 0; padding-top: 80px;
+    font-size: 24px; color: #333;
+  }
+  .civilization-path {
+    stroke-width: 8; opacity: 0.7; cursor: pointer;
+    stroke-dasharray: 5,5;
+  }
+  .wave-label {
+    font-size: 14px; font-weight: bold;
+  }
+  .kondratiev-wave {
+    stroke-width: 2.5;
+    stroke-dasharray: 6,6;
+    fill: none;
+  }
+  .industrial-label {
+    font-size: 14px; font-weight: bold;
+    text-anchor: middle;
+  }
+  .industrial-detail {
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .scientist-star {
+    opacity: 0.9;
+  }
+  .industrial-line {
+    stroke: blue;
+    stroke-dasharray: 4,4;
+    opacity: 0.7;
+    stroke-width: 2;
+  }
+  .industrial-bg {
+    opacity: 0.1;
+  }
+</style>
+</head>
+<body>
+<h2>康波周期 + 工业革命（1400–2025）</h2>
+<div class="legend" id="legend">
+  <div class="legend-item legend-nations major" data-type="nation" data-key="major">
+    <div class="legend-color" style="background:#5555cc; border-width: 2px;"></div>主导霸权国家
+  </div>
+  <div class="legend-item legend-nations minor" data-type="nation" data-key="minor">
+    <div class="legend-color" style="background:#999999;"></div>其他国家
+  </div>
+  <div class="legend-item legend-civilizations" data-type="civilization" data-key="civilization">
+    <div class="legend-color" style="background:#aa66aa;"></div>古代文明
+  </div>
+  <div class="legend-item legend-events" data-type="event" data-key="war">
+    <div class="legend-color" style="background:#777777;"></div>战争事件
+  </div>
+  <div class="legend-item legend-events" data-type="event" data-key="crisis">
+    <div class="legend-color" style="background:#cc0000;"></div>经济危机
+  </div>
+  <div class="legend-item legend-events" data-type="event" data-key="tech">
+    <div class="legend-color" style="background:#0077cc;"></div>技术事件
+  </div>
+  <div class="legend-item legend-events" data-type="event" data-key="culture">
+    <div class="legend-color" style="background:#00aa00;"></div>文化事件
+  </div>
+  <div class="legend-item legend-industrial" data-type="industrial" data-key="industrial">
+    <div class="legend-color" style="background:#0000ff;"></div>工业革命事件
+  </div>
+  <div class="legend-item legend-scientist" data-type="scientist" data-key="scientist">
+    <div class="legend-color" style="background:gold;"></div>科学家
+  </div>
+  <div class="legend-item" data-type="kondratiev" data-key="kondratiev">
+    <div class="legend-color" style="background:teal; border: none;"></div>康波周期曲线
+  </div>
+</div>
+<div id="chart"></div>
+<div class="tooltip" id="tooltip" style="opacity:0;"></div>
+<script>
+(function(){
+  const margin = {top: 120, right: 100, bottom: 80, left: 90};
+  const width = window.innerWidth*0.98 - margin.left - margin.right;
+  const height = 1400 - margin.top - margin.bottom;
+  const svg = d3.select("#chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .style("user-select", "none")
+    .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // 时间范围1400-2025
+  const yearStart = 1400, yearEnd = 2025;
+  const xScale = d3.scaleLinear().domain([yearStart, yearEnd]).range([0, width]);
+  const yScale = d3.scaleLinear().domain([-2, 12]).range([height, 0]);
+
+  const tooltip = d3.select("#tooltip");
+
+  // 康波周期数据
+  const kondratievWaves = [
+    {start:1780,end:1840,label:"第一康波周期",detail:"纺织工业与蒸汽动力 (1780-1840)"},
+    {start:1840,end:1890,label:"第二康波周期",detail:"铁路与钢铁时代 (1840-1890)"},
+    {start:1890,end:1940,label:"第三康波周期",detail:"电力与重工业 (1890-1940)"},
+    {start:1940,end:1990,label:"第四康波周期",detail:"石油化工与汽车 (1940-1990)"},
+    {start:1990,end:2025,label:"第五康波周期",detail:"信息技术与全球化 (1990-2025)"}
+  ];
+
+  // 生成康波周期曲线
+  const waveData = [];
+  kondratievWaves.forEach(w=>{
+    for(let year=w.start; year<=w.end; year++){
+      const cycle = Math.sin(((year - w.start)/(w.end - w.start))*Math.PI);
+      waveData.push({year: year, value: cycle*1.5});
+    }
+  });
+  
+  // 绘制康波周期曲线
+  const wavePath = svg.append("path")
+    .datum(waveData)
+    .attr("class", "kondratiev-wave")
+    .attr("stroke", "teal")
+    .attr("d", d3.line()
+      .x(d=>xScale(d.year))
+      .y(d=>yScale(d.value))
+    )
+    .on("mouseover", (event)=>{
+      tooltip.style("opacity", 1).html(`
+        <strong>康波周期曲线</strong><br>
+        长期经济周期理论，约40-60年为一个周期<br>
+        包含技术创新、经济扩张和衰退阶段
+      `)
+        .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 48) + "px");
+    })
+    .on("mouseout", ()=>tooltip.style("opacity", 0));
+
+  // 为每个康波周期添加标签和交互
+  kondratievWaves.forEach((wave, i) => {
+    const midX = xScale((wave.start + wave.end)/2);
+    const yPos = yScale(1.5 + Math.sin(i * 0.5) * 0.3);
+    
+    const waveGroup = svg.append("g")
+      .attr("class", "wave-group")
+      .attr("cursor", "pointer");
+    
+    waveGroup.append("text")
+      .attr("x", midX)
+      .attr("y", yPos)
+      .attr("class", "wave-label")
+      .attr("text-anchor", "middle")
+      .attr("fill", "teal")
+      .text(wave.label)
+      .on("mouseover", (event)=>{
+        tooltip.style("opacity", 1).html(`
+          <strong>${wave.label}</strong><br>
+          时间: ${wave.start}-${wave.end}<br>
+          ${wave.detail}
+        `)
+          .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 48) + "px");
+      })
+      .on("mouseout", ()=>tooltip.style("opacity", 0));
+  });
+
+  // 工业革命阶段（优化显示）
+  const industrialRevolutions = [
+    {start:1760,end:1840,label:"第一次工业革命",detail:"蒸汽机/纺织机械化",yPos:60,color:"rgba(0,0,255,0.1)"},
+    {start:1870,end:1914,label:"第二次工业革命",detail:"电力/内燃机/大规模生产",yPos:90,color:"rgba(0,100,255,0.1)"},
+    {start:1945,end:1990,label:"第三次工业革命",detail:"计算机/自动化/核能",yPos:120,color:"rgba(0,150,255,0.1)"},
+    {start:1990,end:2025,label:"第四次工业革命",detail:"数字技术/互联网/人工智能",yPos:150,color:"rgba(0,200,255,0.1)"}
+  ];
+  
+  // 绘制工业革命背景区域
+  industrialRevolutions.forEach((rev) => {
+    svg.append("rect")
+      .attr("class", "industrial-bg")
+      .attr("x", xScale(rev.start))
+      .attr("y", 0)
+      .attr("width", xScale(rev.end)-xScale(rev.start))
+      .attr("height", height)
+      .attr("fill", rev.color);
+  });
+  
+  // 绘制工业革命区域和标签
+  industrialRevolutions.forEach((rev) => {
+    const midX = xScale((rev.start + rev.end)/2);
+    
+    // 绘制边界线（更明显的竖线）
+    svg.append("line")
+      .attr("class", "industrial-line")
+      .attr("x1", xScale(rev.start))
+      .attr("y1", 0)
+      .attr("x2", xScale(rev.start))
+      .attr("y2", height);
+    
+    svg.append("line")
+      .attr("class", "industrial-line")
+      .attr("x1", xScale(rev.end))
+      .attr("y1", 0)
+      .attr("x2", xScale(rev.end))
+      .attr("y2", height);
+    
+    // 添加主标签
+    svg.append("text")
+      .attr("x", midX)
+      .attr("y", rev.yPos)
+      .attr("class", "industrial-label")
+      .attr("fill", "blue")
+      .text(`${rev.label} (${rev.start}-${rev.end})`);
+    
+    // 添加详细说明
+    svg.append("text")
+      .attr("x", midX)
+      .attr("y", rev.yPos + 18)
+      .attr("class", "industrial-detail")
+      .attr("fill", "blue")
+      .text(rev.detail);
+  });
+
+  // 精确调整的古代文明数据（添加清朝）
+  const ancientCivilizations = [
+    {name:"明朝",startYear:1368,peakYear:1420,endYear:1644,color:"#aa66aa",yBase:9.5,major:true},
+    {name:"清朝",startYear:1636,peakYear:1760,endYear:1912,color:"#cc6666",yBase:9.2,major:true},
+    {name:"奥斯曼帝国",startYear:1299,peakYear:1550,endYear:1922,color:"#8a4c8a",yBase:9,major:false},
+    {name:"西班牙帝国",startYear:1469,peakYear:1580,endYear:1715,color:"#996633",yBase:8.5,major:true},
+    {name:"莫卧儿帝国",startYear:1526,peakYear:1650,endYear:1857,color:"#aa88aa",yBase:8,major:false}
+  ];
+
+  // 绘制古代文明曲线
+  function drawCivilizations(selected) {
+    svg.selectAll(".civilization-path").remove();
+    selected.forEach(c=>{
+      const path = d3.path();
+      const startX = xScale(c.startYear), peakX = xScale(c.peakYear), endX = xScale(c.endYear);
+      const yBase = yScale(c.yBase);
+      path.moveTo(startX, yBase + 15);
+      path.bezierCurveTo((startX+peakX)/2, yBase-40, (peakX+endX)/2, yBase-40, endX, yBase+15);
+      svg.append("path")
+        .attr("class", "civilization-path")
+        .attr("stroke", c.color)
+        .attr("fill", "none")
+        .attr("d", path.toString())
+        .on("mouseover", (event)=>{
+          tooltip.style("opacity", 1).html(`
+            <strong>${c.name}</strong><br>
+            兴起: ${c.startYear} (${c.major?"主要霸权国家":"区域性大国"})<br>
+            巅峰: ${c.peakYear}<br>
+            衰落: ${c.endYear}<br>
+            ${getCivilizationDetail(c.name)}
+          `)
+            .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 48) + "px");
+          d3.select(event.currentTarget).attr("stroke-width", 12).style("opacity", 1);
+        })
+        .on("mouseout", (event)=>{
+          tooltip.style("opacity", 0);
+          d3.select(event.currentTarget).attr("stroke-width", 8).style("opacity", 0.7);
+        });
+    });
+  }
+  
+  // 文明详细信息（添加清朝）
+  function getCivilizationDetail(name) {
+    const details = {
+      "明朝": "明朝(1368-1644)是中国历史上最后一个由汉族建立的大一统王朝，永乐年间达到鼎盛，郑和下西洋展示了强大的海上力量。",
+      "清朝": "清朝(1636-1912)是中国最后一个封建王朝，康乾盛世达到鼎盛，领土达到最大，但后期闭关锁国导致落后于西方工业革命。",
+      "奥斯曼帝国": "奥斯曼帝国(1299-1922)是横跨亚欧非三大洲的帝国，苏莱曼大帝时期(1520-1566)达到鼎盛，控制了东西方贸易要道。",
+      "西班牙帝国": "西班牙帝国(1469-1715)通过哥伦布发现美洲和殖民扩张成为第一个全球性帝国，1580年代达到顶峰，拥有无敌舰队。",
+      "莫卧儿帝国": "莫卧儿帝国(1526-1857)统治南亚次大陆，阿克巴大帝和沙贾汗时期达到鼎盛，建造了泰姬陵等伟大建筑。"
+    };
+    return details[name] || "";
+  }
+  
+  drawCivilizations(ancientCivilizations);
+
+  // 精确调整的国家兴衰数据
+  const nations = [
+    {name:"葡萄牙",startYear:1415,peakYear:1540,endYear:1580,color:"#009933",yBase:7.5,major:true},
+    {name:"荷兰",startYear:1581,peakYear:1650,endYear:1720,color:"#ff9900",yBase:7,major:true},
+    {name:"法国",startYear:1643,peakYear:1789,endYear:1815,color:"#6666ff",yBase:6.5,major:true},
+    {name:"英国",startYear:1707,peakYear:1850,endYear:1945,color:"#0033cc",yBase:6,major:true},
+    {name:"美国",startYear:1898,peakYear:1945,endYear:2025,color:"#cc0000",yBase:5.5,major:true},
+    {name:"苏联",startYear:1922,peakYear:1955,endYear:1991,color:"#990000",yBase:5,major:false},
+    {name:"中国",startYear:1949,peakYear:2020,endYear:2050,color:"#ff0000",yBase:4.5,major:true}
+  ];
+
+  // 画国家曲线函数
+  function drawNations(selected){
+    svg.selectAll(".nation-path").remove();
+    selected.forEach(n=>{
+      const path = d3.path();
+      const startX = xScale(n.startYear), peakX = xScale(n.peakYear), endX = xScale(n.endYear);
+      const yBase = yScale(n.yBase);
+      path.moveTo(startX, yBase + 15);
+      path.bezierCurveTo((startX+peakX)/2, yBase-40, (peakX+endX)/2, yBase-40, endX, yBase+15);
+      svg.append("path")
+        .attr("class", "nation-path " + (n.major ? "major" : "minor"))
+        .attr("stroke", n.color)
+        .attr("fill", "none")
+        .attr("d", path.toString())
+        .on("mouseover", (event)=>{
+          tooltip.style("opacity", 1).html(`
+            <strong>${n.name}</strong><br>
+            兴起: ${n.startYear} (${n.major?"全球主导国家":"区域性大国"})<br>
+            巅峰: ${n.peakYear}<br>
+            衰落: ${n.endYear}<br>
+            ${getNationDetail(n.name)}
+          `)
+            .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 48) + "px");
+          d3.select(event.currentTarget).attr("stroke-width", n.major ? 18 : 10).style("opacity", 1);
+        })
+        .on("mouseout", (event)=>{
+          tooltip.style("opacity", 0);
+          d3.select(event.currentTarget).attr("stroke-width", n.major ? 12 : 6).style("opacity", n.major ? 0.85 : 0.65);
+        });
+    });
+  }
+  
+  // 国家详细信息
+  function getNationDetail(name) {
+    const details = {
+      "葡萄牙": "葡萄牙(1415-1580)通过航海探索建立第一个全球殖民帝国，1494年与西班牙签订《托尔德西里亚斯条约》瓜分世界。",
+      "荷兰": "荷兰(1581-1720)建立东印度公司，17世纪成为海上马车夫，阿姆斯特丹成为世界金融中心。",
+      "法国": "法国(1643-1815)在路易十四和拿破仑时期达到鼎盛，欧洲大陆霸权，传播启蒙思想和革命理念。",
+      "英国": "英国(1707-1945)通过工业革命和海军优势建立日不落帝国，19世纪成为世界工厂和金融中心。",
+      "美国": "美国(1898-今)通过两次世界大战崛起为超级大国，冷战胜利后成为唯一超级大国，主导全球经济体系。",
+      "苏联": "苏联(1922-1991)二战后成为与美国抗衡的超级大国，在航天和军事领域取得重大成就，1991年解体。",
+      "中国": "中国(1949-今)改革开放后经济快速发展，21世纪成为世界第二大经济体，全球制造业中心。"
+    };
+    return details[name] || "";
+  }
+  
+  drawNations(nations);
+
+  // 战争事件（灰色长方形）
+  const wars = [
+    {name:"百年战争",start:1337,end:1453,importance:4,yLevel:0,detail:"英法之间的长期战争，促进了民族国家形成"},
+    {name:"三十年战争",start:1618,end:1648,importance:4,yLevel:0,detail:"欧洲宗教战争，威斯特伐利亚体系确立"},
+    {name:"七年战争",start:1756,end:1763,importance:5,yLevel:0,detail:"第一次全球性战争，英国成为最大赢家"},
+    {name:"拿破仑战争",start:1803,end:1815,importance:5,yLevel:0,detail:"法国与反法同盟战争，维也纳体系建立"},
+    {name:"第一次世界大战",start:1914,end:1918,importance:5,yLevel:0,detail:"同盟国与协约国战争，凡尔赛体系形成"},
+    {name:"第二次世界大战",start:1939,end:1945,importance:5,yLevel:0,detail:"轴心国与同盟国战争，联合国建立"},
+    {name:"冷战",start:1947,end:1991,importance:5,yLevel:0,detail:"美苏两大阵营对抗，核威慑平衡"},
+    {name:"鸦片战争",start:1840,end:1842,importance:4,yLevel:0,detail:"中国与英国的战争，中国战败，开始半殖民地化"},
+    {name:"甲午战争",start:1894,end:1895,importance:4,yLevel:0,detail:"中日战争，中国战败，签订《马关条约》"}
+  ];
+
+  // 绘制战争矩形
+  svg.selectAll(".war-rect")
+    .data(wars)
+    .enter().append("rect")
+    .attr("class", "war-rect")
+    .attr("x", d=>xScale(d.start))
+    .attr("y", d=>yScale(0.5 + d.yLevel) - (d.importance * 6))
+    .attr("width", d=>xScale(d.end)-xScale(d.start))
+    .attr("height", d=>d.importance * 6)
+    .attr("fill", "#777777")
+    .on("mouseover", (event,d)=>{
+      tooltip.style("opacity", 1).html(`
+        <strong>${d.name} (${d.start}-${d.end})</strong><br>
+        持续时间: ${d.end-d.start}年<br>
+        重要性: ${"★".repeat(d.importance)}<br>
+        ${d.detail}
+      `)
+        .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 48) + "px");
+      d3.select(event.currentTarget).attr("opacity", 1);
+    })
+    .on("mouseout", (event)=>{
+      tooltip.style("opacity", 0);
+      d3.select(event.currentTarget).attr("opacity", 0.7);
+    });
+
+  // 经济危机（红色圆角长方形）
+  const crises = [
+    {name:"郁金香狂热",start:1636,end:1637,importance:3,yLevel:1,detail:"历史上第一次有记载的金融泡沫，荷兰郁金香价格暴跌"},
+    {name:"南海泡沫",start:1720,end:1720,importance:4,yLevel:1,detail:"英国南海公司股票投机泡沫破裂，导致经济衰退"},
+    {name:"1837年恐慌",start:1837,end:1843,importance:4,yLevel:1,detail:"美国银行危机，持续多年的经济萧条"},
+    {name:"长期萧条",start:1873,end:1896,importance:5,yLevel:1,detail:"全球性经济危机，通货紧缩持续20余年"},
+    {name:"大萧条",start:1929,end:1939,importance:5,yLevel:1,detail:"华尔街股灾引发全球经济衰退，失业率飙升"},
+    {name:"石油危机",start:1973,end:1975,importance:4,yLevel:1,detail:"石油禁运导致能源危机和全球经济滞胀"},
+    {name:"亚洲金融危机",start:1997,end:1998,importance:4,yLevel:1,detail:"亚洲多国货币贬值，经济严重衰退"},
+    {name:"全球金融危机",start:2007,end:2009,importance:5,yLevel:1,detail:"次贷危机引发全球金融体系震荡"},
+    {name:"白银危机",start:1630,end:1640,importance:3,yLevel:1,detail:"明朝因白银流入减少导致经济衰退"}
+  ];
+
+  // 绘制经济危机矩形
+  svg.selectAll(".crisis-rect")
+    .data(crises)
+    .enter().append("rect")
+    .attr("class", "crisis-rect")
+    .attr("x", d=>xScale(d.start))
+    .attr("y", d=>yScale(1.5 + d.yLevel) - (d.importance * 5))
+    .attr("width", d=>xScale(d.end)-xScale(d.start))
+    .attr("height", d=>d.importance * 5)
+    .attr("fill", "#cc0000")
+    .on("mouseover", (event,d)=>{
+      tooltip.style("opacity", 1).html(`
+        <strong>${d.name} (${d.start}-${d.end})</strong><br>
+        持续时间: ${d.end-d.start}年<br>
+        严重程度: ${"★".repeat(d.importance)}<br>
+        ${d.detail}
+      `)
+        .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 48) + "px");
+      d3.select(event.currentTarget).attr("opacity", 1);
+    })
+    .on("mouseout", (event)=>{
+      tooltip.style("opacity", 0);
+      d3.select(event.currentTarget).attr("opacity", 0.8);
+    });
+
+  // 技术事件（优化去重版，添加中国相关技术）
+  const techEvents = [
+    {year:1440,name:"古腾堡印刷机",detail:"欧洲印刷革命开始，知识传播加速",importance:5,yLevel:2,type:"tech"},
+    {year:1608,name:"望远镜发明",detail:"伽利略改进望远镜，开启天文观测新时代",importance:4,yLevel:2,type:"tech"},
+    {year:1765,name:"蒸汽机改进",detail:"瓦特改良蒸汽机，工业革命核心动力",importance:5,yLevel:2,type:"tech"},
+    {year:1837,name:"电报发明",detail:"莫尔斯发明实用电报系统，改变远距离通信",importance:4,yLevel:2,type:"tech"},
+    {year:1876,name:"电话发明",detail:"贝尔获得电话专利，开启语音通信时代",importance:4,yLevel:2,type:"tech"},
+    {year:1903,name:"飞机发明",detail:"莱特兄弟首次动力飞行，开启航空时代",importance:5,yLevel:2,type:"tech"},
+    {year:1947,name:"晶体管发明",detail:"贝尔实验室发明晶体管，电子革命开端",importance:5,yLevel:2,type:"tech"},
+    {year:1969,name:"互联网诞生",detail:"ARPANET建立，计算机网络时代开始",importance:5,yLevel:2,type:"tech"},
+    {year:2007,name:"智能手机革命",detail:"iPhone发布，移动互联网普及",importance:4,yLevel:2,type:"tech"},
+    {year:2003,name:"神舟五号",detail:"中国首次载人航天飞行，杨利伟成为首位中国航天员",importance:4,yLevel:2,type:"tech"},
+    {year:2016,name:"量子卫星",detail:"中国发射世界首颗量子科学实验卫星'墨子号'",importance:4,yLevel:2,type:"tech"},
+    {year:2020,name:"北斗系统",detail:"中国北斗三号全球卫星导航系统全面建成",importance:4,yLevel:2,type:"tech"}
+  ];
+  
+  // 绘制技术事件
+  svg.selectAll(".tech-circle")
+    .data(techEvents)
+    .enter().append("circle")
+    .attr("class", "event-circle event-tech")
+    .attr("cx", d=>xScale(d.year))
+    .attr("cy", d=>yScale(2 + d.yLevel))
+    .attr("r", d=>3 + d.importance)
+    .attr("fill", "#0077cc")
+    .on("mouseover", (event,d)=>{
+      tooltip.style("opacity", 1).html(`
+        <strong>${d.name} (${d.year})</strong><br>
+        重要性: ${"★".repeat(d.importance)}<br>
+        ${d.detail}
+      `)
+        .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 48) + "px");
+    })
+    .on("mouseout", ()=>tooltip.style("opacity", 0));
+
+  // 文化/政治事件（优化版，添加中国相关事件）
+  const cultureEvents = [
+    {year:1453,name:"君士坦丁堡陷落",detail:"拜占庭帝国灭亡，奥斯曼帝国崛起，欧洲文艺复兴加速",importance:4,yLevel:3,type:"culture"},
+    {year:1492,name:"哥伦布发现美洲",detail:"开启大航海时代和全球殖民扩张",importance:5,yLevel:3,type:"culture"},
+    {year:1517,name:"宗教改革",detail:"马丁·路德《九十五条论纲》，基督教分裂",importance:5,yLevel:3,type:"culture"},
+    {year:1689,name:"光荣革命",detail:"英国确立君主立宪制，议会主权",importance:4,yLevel:3,type:"culture"},
+    {year:1776,name:"美国独立宣言",detail:"美利坚合众国成立，启蒙思想实践",importance:5,yLevel:3,type:"culture"},
+    {year:1789,name:"法国大革命",detail:"推翻君主专制，颁布人权宣言",importance:5,yLevel:3,type:"culture"},
+    {year:1917,name:"十月革命",detail:"俄国建立第一个社会主义国家",importance:5,yLevel:3,type:"culture"},
+    {year:1945,name:"联合国成立",detail:"建立战后国际秩序，维护世界和平",importance:5,yLevel:3,type:"culture"},
+    {year:1989,name:"冷战结束",detail:"柏林墙倒塌，两极格局终结",importance:5,yLevel:3,type:"culture"},
+    {year:1405,name:"郑和下西洋",detail:"明朝郑和七次下西洋，展示中国海上力量",importance:4,yLevel:3,type:"culture"},
+    {year:1911,name:"辛亥革命",detail:"推翻清朝统治，建立中华民国",importance:5,yLevel:3,type:"culture"},
+    {year:1949,name:"新中国成立",detail:"中华人民共和国成立",importance:5,yLevel:3,type:"culture"},
+    {year:1978,name:"改革开放",detail:"中国开始经济改革和对外开放政策",importance:5,yLevel:3,type:"culture"},
+    {year:2001,name:"加入WTO",detail:"中国加入世界贸易组织，加速融入全球经济",importance:4,yLevel:3,type:"culture"}
+  ];
+  
+  // 绘制文化事件
+  svg.selectAll(".culture-circle")
+    .data(cultureEvents)
+    .enter().append("circle")
+    .attr("class", "event-circle event-culture")
+    .attr("cx", d=>xScale(d.year))
+    .attr("cy", d=>yScale(3 + d.yLevel))
+    .attr("r", d=>3 + d.importance)
+    .attr("fill", "#00aa00")
+    .on("mouseover", (event,d)=>{
+      tooltip.style("opacity", 1).html(`
+        <strong>${d.name} (${d.year})</strong><br>
+        影响力: ${"★".repeat(d.importance)}<br>
+        ${d.detail}
+      `)
+        .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 48) + "px");
+    })
+    .on("mouseout", ()=>tooltip.style("opacity", 0));
+
+  // 科学家数据（优化显示，放在页面底部，添加中国科学家）
+  const scientists = [
+    // 第一康波周期 (1780-1840)
+    {name:"瓦特",country:"英国",birth:1736,death:1819,contribution:"改良蒸汽机，工业革命关键人物",wave:"第一康波",influence:5,year:1785,yLevel:10},
+    {name:"法拉第",country:"英国",birth:1791,death:1867,contribution:"电磁学奠基人，发现电磁感应",wave:"第一康波",influence:5,year:1821,yLevel:10},
+    
+    // 第二康波周期 (1840-1890)
+    {name:"达尔文",country:"英国",birth:1809,death:1882,contribution:"进化论，生物学革命",wave:"第二康波",influence:5,year:1859,yLevel:10},
+    {name:"门捷列夫",country:"俄罗斯",birth:1834,death:1907,contribution:"元素周期表",wave:"第二康波",influence:4,year:1869,yLevel:10},
+    {name:"麦克斯韦",country:"英国",birth:1831,death:1879,contribution:"电磁理论统一者",wave:"第二康波",influence:5,year:1865,yLevel:10},
+    
+    // 第三康波周期 (1890-1940)
+    {name:"居里夫人",country:"波兰/法国",birth:1867,death:1934,contribution:"放射性研究，发现镭和钋",wave:"第三康波",influence:5,year:1898,yLevel:10},
+    {name:"爱因斯坦",country:"德国/美国",birth:1879,death:1955,contribution:"相对论，现代物理学革命",wave:"第三康波",influence:5,year:1905,yLevel:10},
+    {name:"玻尔",country:"丹麦",birth:1885,death:1962,contribution:"原子结构理论",wave:"第三康波",influence:4,year:1913,yLevel:10},
+    
+    // 第四康波周期 (1940-1990)
+    {name:"图灵",country:"英国",birth:1912,death:1954,contribution:"计算机科学之父",wave:"第四康波",influence:5,year:1936,yLevel:10},
+    {name:"冯·诺依曼",country:"匈牙利/美国",birth:1903,death:1957,contribution:"现代计算机架构",wave:"第四康波",influence:5,year:1945,yLevel:10},
+    {name:"费曼",country:"美国",birth:1918,death:1988,contribution:"量子电动力学",wave:"第四康波",influence:4,year:1965,yLevel:10},
+    {name:"钱学森",country:"中国",birth:1911,death:2009,contribution:"中国航天之父",wave:"第四康波",influence:4,year:1956,yLevel:10},
+    
+    // 第五康波周期 (1990-2025)
+    {name:"伯纳斯-李",country:"英国",birth:1955,death:null,contribution:"发明万维网",wave:"第五康波",influence:5,year:1989,yLevel:10},
+    {name:"屠呦呦",country:"中国",birth:1930,death:null,contribution:"发现青蒿素",wave:"第五康波",influence:4,year:1972,yLevel:10},
+    {name:"霍金",country:"英国",birth:1942,death:2018,contribution:"黑洞理论研究",wave:"第五康波",influence:4,year:1974,yLevel:10},
+    {name:"袁隆平",country:"中国",birth:1930,death:2021,contribution:"杂交水稻之父",wave:"第五康波",influence:4,year:1973,yLevel:10}
+  ];
+  
+  const starPath = "M0,-1L0.2245,-0.3090L0.9511,-0.3090L0.3633,0.1180L0.5878,0.8090L0,0.3820L-0.5878,0.8090L-0.3633,0.1180L-0.9511,-0.3090L-0.2245,-0.3090Z";
+  svg.selectAll(".scientist-star")
+    .data(scientists)
+    .enter().append("path")
+    .attr("class","scientist-star")
+    .attr("d", starPath)
+    .attr("transform", d => `translate(${xScale(d.year)},${yScale(d.yLevel)}) scale(${d.influence*8/5})`) // 调大星星尺寸
+    .attr("fill", "gold")
+    .on("mouseover", (event,d)=>{
+      tooltip.style("opacity", 1).html(`
+        <strong>${d.name} (${d.country})</strong><br>
+        ${d.birth}–${d.death||"至今"}<br>
+        主要贡献: ${d.contribution}<br>
+        活跃时期: ${d.wave}<br>
+        影响力: ${"★".repeat(d.influence)}
+      `)
+        .style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 48) + "px");
+    })
+    .on("mouseout", ()=>tooltip.style("opacity", 0));
+
+  // 轴
+  svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(xScale).ticks(30).tickFormat(d3.format("d")))
+    .selectAll("text")
+    .attr("transform", "translate(0,5) rotate(-45)")
+    .style("text-anchor", "end");
+  svg.append("g")
+    .call(d3.axisLeft(yScale).ticks(10));
+
+  // 交互控制图例
+  const legend = d3.select("#legend");
+  const visibility = {
+    nation_major: true,
+    nation_minor: true,
+    civilization: true,
+    event_war: true,
+    event_crisis: true,
+    event_tech: true,
+    event_culture: true,
+    industrial: true,
+    scientist: true,
+    kondratiev: true
+  };
+
+  function updateVisibility(){
+    // 国家曲线
+    svg.selectAll(".nation-path.major").style("display", visibility.nation_major ? null : "none");
+    svg.selectAll(".nation-path.minor").style("display", visibility.nation_minor ? null : "none");
+    // 文明曲线
+    svg.selectAll(".civilization-path").style("display", visibility.civilization ? null : "none");
+    // 战争矩形
+    svg.selectAll(".war-rect").style("display", visibility.event_war ? null : "none");
+    // 危机矩形
+    svg.selectAll(".crisis-rect").style("display", visibility.event_crisis ? null : "none");
+    // 技术事件
+    svg.selectAll(".event-tech").style("display", visibility.event_tech ? null : "none");
+    // 文化事件
+    svg.selectAll(".event-culture").style("display", visibility.event_culture ? null : "none");
+    // 工业革命
+    svg.selectAll(".industrial-label, .industrial-detail").style("display", visibility.industrial ? null : "none");
+    svg.selectAll(".industrial-line, .industrial-bg").style("display", visibility.industrial ? null : "none");
+    // 科学家
+    svg.selectAll(".scientist-star").style("display", visibility.scientist ? null : "none");
+    // 康波周期曲线
+    svg.selectAll(".kondratiev-wave, .wave-group").style("display", visibility.kondratiev ? null : "none");
+  }
+
+  legend.selectAll(".legend-item").on("click", function(){
+    const item = d3.select(this);
+    const type = item.attr("data-type");
+    const key = item.attr("data-key");
+    const mapKey = type + (key ? "_" + key : "");
+    visibility[mapKey] = !visibility[mapKey];
+    item.classed("disabled", !visibility[mapKey]);
+    updateVisibility();
+  });
+
+  updateVisibility();
+})();
+</script>
+</body>
+</html>
+
+
