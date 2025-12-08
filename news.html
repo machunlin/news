@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>国际中国研究智库导航 — 按主题过滤（科技/军事/经济/产业链/外交）</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa7bf;--accent:#3b82f6}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    body{background:linear-gradient(180deg,#071028 0%,#071129 60%);color:#e6eef8}
+    .container{max-width:1100px;margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:4px 0 18px;color:var(--muted)}
+
+    .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+    .search{flex:1;min-width:220px}
+    input[type=text]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit}
+    .filters{display:flex;gap:8px;flex-wrap:wrap}
+    .tag{padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);cursor:pointer}
+    .tag.active{background:var(--accent);color:#04203a}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:880px){.grid{grid-template-columns:1fr 340px}}
+
+    .list{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px}
+    .card{padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:6px}
+    .meta{display:flex;gap:10px;align-items:center}
+    .name{font-weight:600}
+    .desc{color:var(--muted);font-size:13px}
+    .links{display:flex;gap:8px;flex-wrap:wrap}
+    .link{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:13px;color:var(--accent);text-decoration:none}
+    .pill{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted)}
+
+    aside{position:relative}
+    .panel{position:sticky;top:20px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)}
+    .panel h3{margin:0 0 8px 0}
+    .list-compact{display:flex;flex-direction:column;gap:8px}
+    .compact-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01)}
+
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    .btn{display:inline-block;padding:8px 10px;border-radius:8px;background:var(--accent);color:#022034;text-decoration:none;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden><rect width="24" height="24" rx="6" fill="#0b1220"/><path d="M6 8h12M6 12h12M6 16h8" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>
+        <h1>国际中国研究智库导航</h1>
+        <p class="lead">按主题智能筛选：科技 • 军事 • 经济 • 产业链 • 外交。页面内提供英文站点与可在中文区访问或中文替代来源。</p>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="search">
+        <input id="q" type="text" placeholder="搜索：机构名称 / 关键词（例如 China, supply chain, AI）" oninput="refresh()" />
+      </div>
+      <div class="filters" role="toolbar" aria-label="主题筛选">
+        <div class="tag active" data-tag="all" onclick="toggleTag(event)">全部</div>
+        <div class="tag" data-tag="科技" onclick="toggleTag(event)">科技</div>
+        <div class="tag" data-tag="军事" onclick="toggleTag(event)">军事</div>
+        <div class="tag" data-tag="经济" onclick="toggleTag(event)">经济</div>
+        <div class="tag" data-tag="产业链" onclick="toggleTag(event)">产业链</div>
+        <div class="tag" data-tag="外交" onclick="toggleTag(event)">外交</div>
+      </div>
+      <div style="margin-left:auto">
+        <a class="btn" href="#" onclick="exportCSV();return false">导出 CSV</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <main class="list" id="mainList" aria-live="polite">
+        <!-- 列表项由 JS 注入 -->
+      </main>
+
+      <aside>
+        <div class="panel">
+          <h3>快捷导航（按主题）</h3>
+          <div class="list-compact" id="compact">
+            <!-- compact list -->
+          </div>
+          <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+          <div>
+            <h4 style="margin:0 0 8px 0">中文可访问 / 替代来源（示例）</h4>
+            <div class="desc" style="font-size:13px">本区域列出在中文网络环境中通常更易访问或有中文内容的研究机构与媒体，可作为西方智库英文站点的替代或补充。</div>
+            <ul style="margin-top:8px;color:var(--muted);padding-left:18px">
+              <li>中国社会科学院 / 国研中心（CASS） — 学术与宏观研究</li>
+              <li>中国国际问题研究院（CIIS） — 外交 / 对外政策</li>
+              <li>上海国际问题研究院（SIIS） — 区域/经济/产业研究</li>
+              <li>中国国际经济交流中心（CCIEE） — 经济/产业链</li>
+              <li>台湾中华经济研究院（CIER） — 区域经济与国际比较</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <div>说明：条目包含“机构名 / 简短描述 / 官方英文站点 / 中文可访问替代（若存在）”。如需我把此页面导出为单文件 HTML 或部署静态托管（含搜索与定期更新脚本），回复“部署”。</div>
+    </footer>
+  </div>
+
+  <script>
+    // 数据：机构列表（name, short, categories[], url, cn_alternative）
+    const DATA = [
+      {name:'MERICS (Mercator Institute for China Studies)', short:'欧洲重要对华研究智库，关注政策、科技与地缘政治', categories:['外交','科技','产业链'], url:'https://merics.org', cn_alternative:'无官方中文站，建议参考欧洲与中文媒体译文'},
+      {name:'CSIS ChinaPower', short:'评估中国综合国力，数据可视化与研究项目', categories:['科技','军事','经济'], url:'https://www.csis.org/programs/chinapower-project', cn_alternative:'可参考国内学术译文或媒体专题'} ,
+      {name:'Carnegie China', short:'卡内基中国项目，外交与国际关系研究', categories:['外交','经济'], url:'https://carnegieendowment.org/programs/asia/china-program', cn_alternative:'中文文章常由媒体或学术译介'},
+      {name:'Brookings — China', short:'布鲁金斯中国专题，政策与经济研究', categories:['经济','外交'], url:'https://www.brookings.edu/topic/china/', cn_alternative:'中文报道/译读较多'},
+      {name:'RAND — China', short:'战略与安全研究，军事/技术政策分析', categories:['军事','科技'], url:'https://www.rand.org/topics/china.html', cn_alternative:'可参考国内安全研究机构/学术译文'},
+      {name:'PIIE (Peterson Institute)', short:'国际经济、贸易与供应链研究', categories:['经济','产业链'], url:'https://www.piie.com', cn_alternative:'国内财经媒体与研究所常有译文'},
+      {name:'Rhodium Group', short:'关注中国FDI、出口管制、供应链与数据分析', categories:['经济','产业链'], url:'https://rhg.com', cn_alternative:'可参考中文财经分析/翻译'},
+      {name:'ASPI (Australia)', short:'亚太安全、科技治理与中国议题研究', categories:['军事','科技'], url:'https://www.aspi.org.au', cn_alternative:'部分文章有中文译介'},
+      {name:'IISS', short:'国际安全研究所，军力与地区安全分析', categories:['军事'], url:'https://www.iiss.org', cn_alternative:'军事领域中文期刊/译文较多'},
+      {name:'ECFR', short:'欧洲对华政策研究、对策与分析', categories:['外交','产业链'], url:'https://ecfr.eu', cn_alternative:'部分报告有中文摘要或媒体译读'},
+      {name:'Chatham House', short:'外交与国际事务研究，含中国专题', categories:['外交','经济'], url:'https://www.chathamhouse.org', cn_alternative:'中文译读/媒体摘要较多'},
+      {name:'Hoover Institution', short:'政策研究，关注制度与经济议题', categories:['经济','外交'], url:'https://www.hoover.org', cn_alternative:'有部分中文材料由学界翻译'},
+      {name:'Asia Society — ChinaFile', short:'专题报道、访谈与档案式内容', categories:['外交','文化'], url:'https://www.chinafile.com', cn_alternative:'中文媒体与学者译介'},
+      {name:'中国国际问题研究院 (CIIS)', short:'中国官方外交研究智库（对外政策视角）', categories:['外交','经济'], url:'http://www.ciis.org.cn', cn_alternative:'中文站点（可直接访问）'},
+      {name:'上海国际问题研究院 (SIIS)', short:'区域经济、贸易与安全研究', categories:['外交','经济','产业链'], url:'http://www.siis.org.cn', cn_alternative:'中文站点（可直接访问）'},
+      {name:'中国国际经济交流中心 (CCIEE)', short:'国际经济与产业链政策研究', categories:['经济','产业链'], url:'http://www.cciee.org.cn', cn_alternative:'中文站点（可直接访问）'},
+      {name:'中国社会科学院 (CASS)', short:'中国最大综合性社会科学研究机构', categories:['经济','外交','军事'], url:'http://www.cssn.cn', cn_alternative:'中文站点（可直接访问）'},
+      {name:'中华经济研究院 (CIER, Taiwan)', short:'台湾区域经济与国际比较研究', categories:['经济','产业链'], url:'https://www.cier.edu.tw', cn_alternative:'中文站点（可直接访问）'}
+    ];
+
+    // render list
+    function renderList(filterTag='all', q=''){
+      const main = document.getElementById('mainList');
+      main.innerHTML = '';
+      const groups = {};
+      // group by primary category for display order
+      DATA.forEach(item =>{
+        const matchesQ = q.trim()==='' || (item.name+item.short+item.categories.join(' ')).toLowerCase().includes(q.toLowerCase());
+        const matchesTag = filterTag==='all' || item.categories.includes(filterTag);
+        if(matchesQ && matchesTag){
+          // push
+          (item.categories||[]).forEach(cat=>{
+            if(!groups[cat]) groups[cat]=[];
+          });
+        }
+      });
+
+      // if no groups selected, fallback to '其他'
+      const order = ['科技','军事','经济','产业链','外交'];
+      order.forEach(cat=>{
+        const items = DATA.filter(it=> (filterTag==='all' || it.categories.includes(filterTag)) && (q.trim()==='' || (it.name+it.short+it.categories.join(' ')).toLowerCase().includes(q.toLowerCase())) && it.categories.includes(cat));
+        if(items.length){
+          const h = document.createElement('h3'); h.textContent = cat; h.style.margin='6px 0 8px 0'; main.appendChild(h);
+          items.forEach(it=> main.appendChild(makeCard(it)));
+        }
+      });
+
+      // items that don't match above categories
+      const rest = DATA.filter(it=> (filterTag==='all' || it.categories.includes(filterTag)) && (q.trim()==='' || (it.name+it.short+it.categories.join(' ')).toLowerCase().includes(q.toLowerCase())) && it.categories.every(c=>!order.includes(c)));
+      if(rest.length){
+        const h = document.createElement('h3'); h.textContent = '其他'; h.style.margin='6px 0 8px 0'; main.appendChild(h);
+        rest.forEach(it=> main.appendChild(makeCard(it)));
+      }
+
+      refreshCompact();
+    }
+
+    function makeCard(it){
+      const card = document.createElement('div'); card.className='card';
+      const meta = document.createElement('div'); meta.className='meta';
+      const name = document.createElement('div'); name.className='name'; name.textContent = it.name;
+      const pills = document.createElement('div'); pills.style.marginLeft='auto';
+      it.categories.forEach(c=>{const p=document.createElement('span');p.className='pill';p.textContent=c;p.style.marginLeft='6px';p.title='主题';p.style.background='rgba(255,255,255,0.02)';p.style.color='var(--muted)';p.style.fontSize='12px';p.style.padding='4px 8px';p.style.borderRadius='999px';p.style.display='inline-block';p.style.marginLeft='6px';p.style.marginRight='0';p.style.lineHeight='1';p.style.border='1px solid rgba(255,255,255,0.02)';p.style.color='var(--muted)';p.style.background='transparent';p.style.fontWeight='600';p.style.color='#a9c0df';p.style.border='1px solid rgba(255,255,255,0.02)';p.style.boxShadow='inset 0 -1px 0 rgba(255,255,255,0.01)';p.style.marginLeft='6px';p.style.cursor='default';p.style.userSelect='none';p.style.display='inline-block';p.style.padding='4px 8px';p.style.fontSize='12px';p.style.borderRadius='999px';p.style.background='rgba(255,255,255,0.01)';p.style.color='#bcd2f7';p.style.border='1px solid rgba(255,255,255,0.02)';p.style.boxShadow='none';p.style.marginLeft='6px';p.style.lineHeight='1';p.style.fontWeight='600';p.style.textTransform='none';p.style.letterSpacing='0';p.style.whiteSpace='nowrap';p.style.marginRight='0';p.style.display='inline-block';p.style.verticalAlign='middle';pills.appendChild(p)});
+      meta.appendChild(name); meta.appendChild(pills);
+      const desc = document.createElement('div'); desc.className='desc'; desc.textContent = it.short;
+      const links = document.createElement('div'); links.className='links';
+      const a = document.createElement('a'); a.href=it.url; a.className='link'; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent='官网/英文';
+      links.appendChild(a);
+      if(it.cn_alternative){const b=document.createElement('a'); b.className='link'; b.href='#'; b.onclick=(e)=>{e.preventDefault();alert(it.cn_alternative);} ; b.textContent='中文替代/访问提示'; links.appendChild(b)}
+
+      card.appendChild(meta); card.appendChild(desc); card.appendChild(links);
+      return card;
+    }
+
+    // compact list
+    function refreshCompact(){
+      const box = document.getElementById('compact'); box.innerHTML='';
+      DATA.slice(0,8).forEach(it=>{
+        const d = document.createElement('div'); d.className='compact-item';
+        const left = document.createElement('div'); left.textContent = it.name; left.style.fontSize='13px'; left.style.fontWeight='600';
+        const right = document.createElement('div'); right.textContent = it.categories.join(', '); right.style.color='var(--muted)'; right.style.fontSize='12px';
+        d.appendChild(left); d.appendChild(right); box.appendChild(d);
+      });
+    }
+
+    // tag toggle
+    let activeTag = 'all';
+    function toggleTag(e){
+      const el = e.currentTarget || e.target;
+      const tag = el.getAttribute('data-tag');
+      // reset
+      document.querySelectorAll('.tag').forEach(t=>t.classList.remove('active'));
+      el.classList.add('active');
+      activeTag = tag;
+      refresh();
+    }
+
+    function refresh(){
+      const q = document.getElementById('q').value||'';
+      renderList(activeTag, q);
+    }
+
+    // export CSV
+    function exportCSV(){
+      const rows = [['机构名','简介','主题','官网','中文替代或访问提示']];
+      DATA.forEach(it=> rows.push([it.name, it.short, it.categories.join('|'), it.url, it.cn_alternative||'']));
+      const csv = rows.map(r=> r.map(c=> '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='thinktanks_navigation.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    // init
+    document.addEventListener('DOMContentLoaded', ()=>{
+      renderList();
+    });
+  </script>
+</body>
+</html>
