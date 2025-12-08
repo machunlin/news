@@ -36,6 +36,10 @@
     .link{padding:6px 8px;border-radius:6px;background:transparent;font-size:13px;color:var(--accent);text-decoration:none}
     .pill{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted)}
 
+    /* 回到顶部悬浮按钮 */
+    .to-top{position:fixed;right:18px;bottom:18px;width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(88,166,255,0.08);color:var(--accent);border:1px solid rgba(255,255,255,0.04);cursor:pointer;box-shadow:0 6px 18px rgba(2,6,23,0.6);backdrop-filter:blur(6px);transition:transform .12s ease,opacity .12s ease;z-index:1000}
+    .to-top svg{width:18px;height:18px}
+
     aside{position:relative}
     .panel{position:sticky;top:20px;padding:12px;border-radius:12px;background-color:var(--card);border:1px solid rgba(255,255,255,0.03)}
     .panel h3{margin:0 0 8px 0}
@@ -114,6 +118,13 @@
     </footer>
   </div>
 
+  <!-- 回到顶部悬浮按钮 -->
+  <button id="toTop" class="to-top" aria-label="回到顶部" title="回到顶部" type="button" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M12 8l4 4H8l4-4z" fill="currentColor" />
+    </svg>
+  </button>
+
   <script>
     // 数据：机构列表（name, short, categories[], url, cn_alternative）
     const DATA = [
@@ -185,7 +196,6 @@
       const links = document.createElement('div'); links.className='links';
       const a = document.createElement('a'); a.href=it.url; a.className='link'; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent='官网/英文';
       links.appendChild(a);
-      if(it.cn_alternative){const b=document.createElement('a'); b.className='link'; b.href='#'; b.onclick=(e)=>{e.preventDefault();alert(it.cn_alternative);} ; b.textContent='中文替代/访问提示'; links.appendChild(b)}
 
       card.appendChild(meta); card.appendChild(desc); card.appendChild(links);
       return card;
@@ -233,6 +243,21 @@
     document.addEventListener('DOMContentLoaded', ()=>{
       renderList();
     });
+
+    // 回到顶部按钮行为（平滑滚动、显示/隐藏）
+    (function(){
+      const btn = document.getElementById('toTop');
+      if(!btn) return;
+      const toggle = ()=>{
+        if(window.scrollY > 200) btn.style.display = 'flex'; else btn.style.display = 'none';
+      };
+      window.addEventListener('scroll', toggle, {passive:true});
+      // 初始检查
+      toggle();
+      btn.addEventListener('click', ()=>{
+        window.scrollTo({top:0,behavior:'smooth'});
+      });
+    })();
   </script>
 </body>
 </html>
