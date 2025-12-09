@@ -5,9 +5,9 @@
 <title>康波周期+全球霸权+工业革命+科学家全景图（文明之光版）</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
-  body { font-family: "Microsoft YaHei", sans-serif; background: #f8f8f8; margin:0; padding:0;}
-  #chart { background: white; margin: 10px auto; width: 98vw; height: 1400px; position: relative;}
-  svg { display: block; margin: auto; background: white; box-shadow: 0 0 5px rgba(0,0,0,0.1);}
+  body { font-family: "Microsoft YaHei", sans-serif; background: #0f1724; margin:0; padding:0; color: #e6eef8;}
+  #chart { background: linear-gradient(180deg,#07101a,#0b1722); margin: 10px auto; width: 98vw; height: 1400px; position: relative;}
+  svg { display: block; margin: auto; background: transparent; box-shadow: 0 8px 30px rgba(0,0,0,0.6);} 
   .tooltip {
     position: absolute; background: rgba(0,0,0,0.9); color: white;
     padding: 12px; border-radius: 8px; pointer-events: none; font-size: 14px;
@@ -27,11 +27,11 @@
     ry: 5;
   }
   .legend {
-    font-size: 14px; user-select:none;
-    background: #fff; border: 1px solid #ccc; padding: 12px 16px; border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    font-size: 13px; user-select:none; color: #e6eef8;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
     position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; z-index: 20;
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; z-index: 30;
     max-width: 92%;
   }
   .legend-item {
@@ -39,19 +39,19 @@
     white-space: nowrap;
   }
   .legend-color {
-    width: 20px; height: 20px; border-radius: 4px;
-    border: 1px solid #999;
+    width: 16px; height: 16px; border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.18);
   }
   .legend-item.disabled .legend-color {
     opacity: 0.3;
   }
   .legend-color.major { border-width: 2px; }
   text.axis-label {
-    font-size: 14px; fill: #333;
+    font-size: 14px; fill: #cbd5e1;
   }
   h2 {
     text-align:center; margin:10px 0; padding-top: 80px;
-    font-size: 24px; color: #333;
+    font-size: 24px; color: #e6eef8;
   }
   .civilization-path {
     stroke-width: 8; opacity: 0.7; cursor: pointer;
@@ -85,23 +85,23 @@
   .industrial-bg {
     opacity: 0.1;
   }
-  /* 说明区样式（优化 UI） */
+  /* 说明区样式（优化 UI - 暗色主题） */
   #explanation{
-    background: linear-gradient(180deg, rgba(250,250,252,1), #fff);
+    background: linear-gradient(180deg, rgba(7,16,26,0.95), rgba(6,12,20,0.98));
     margin:24px auto 48px; padding:22px 26px; border-radius:12px; max-width:1100px;
-    box-shadow:0 6px 20px rgba(0,0,0,0.06); color:#1f2937; line-height:1.6; font-size:15px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.6); color:#e6eef8; line-height:1.7; font-size:16px;
   }
   #explanation .ex-hero{display:flex;gap:14px;align-items:flex-start}
   #explanation .ex-hero .ex-icon{font-size:34px;line-height:1}
   #explanation .ex-hero .ex-title{font-size:20px;font-weight:700;color:#0f172a;margin:0}
-  #explanation .ex-hero .ex-sub{color:#374151;margin:6px 0 0}
+  #explanation .ex-hero .ex-sub{color:#cbd5e1;margin:6px 0 0}
   #explanation h4{margin:14px 0 8px;color:#0b66c2;font-size:16px}
   #explanation .ex-grid{display:grid;grid-template-columns:1fr;gap:12px}
   @media(min-width:900px){#explanation .ex-grid{grid-template-columns:1fr 1fr}}
-  #explanation .callout{border-left:4px solid #e6f2ff;background:linear-gradient(90deg, rgba(240,247,255,0.6), rgba(255,255,255,0.4));padding:12px 14px;border-radius:8px}
-  #explanation .callout.industrial{border-left-color:#dbeafe}
-  #explanation .callout.kond{border-left-color:#bdecef}
-  #explanation .callout.warning{border-left-color:#fee2e2;background:linear-gradient(90deg,#fff7f7,#fff)}
+  #explanation .callout{border-left:4px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);padding:12px 14px;border-radius:8px}
+  #explanation .callout.industrial{border-left-color: rgba(191,219,254,0.9)}
+  #explanation .callout.kond{border-left-color: rgba(189,236,239,0.9)}
+  #explanation .callout.warning{border-left-color: rgba(254,226,226,0.9);background:rgba(255,255,255,0.02)}
   #explanation ul.ex-list{padding-left:18px;margin:8px 0}
   #explanation .meta{color:#6b7280;font-size:14px;margin-top:8px}
   #explanation .anchor-link{display:inline-block;margin-left:8px;color:#0b66c2;text-decoration:none}
