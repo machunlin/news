@@ -5,8 +5,41 @@
 <title>康波周期+全球霸权+工业革命+科学家全景图（文明之光版）</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
-  body { font-family: "Microsoft YaHei", sans-serif; background: #0f1724; margin:0; padding:0; color: #e6eef8;}
-  #chart { background: linear-gradient(180deg,#07101a,#0b1722); margin: 10px auto; width: 98vw; height: 1400px; position: relative;}
+  :root{
+    --bg: #f8f8f8;
+    --text: #1f2937;
+    --chart-start: #ffffff;
+    --chart-end: #ffffff;
+    --card-start: rgba(250,250,252,1);
+    --card-end: #ffffff;
+    --muted: #6b7280;
+    --legend-bg: rgba(255,255,255,0.9);
+  }
+
+  .theme-dark{
+    --bg: #0b2030; /* 换成比之前略亮的深色 */
+    --text: #e6eef8;
+    --chart-start: #091824;
+    --chart-end: #0e2733;
+    --card-start: rgba(12,24,36,0.95);
+    --card-end: rgba(10,18,28,0.98);
+    --muted: #cbd5e1;
+    --legend-bg: rgba(255,255,255,0.04);
+  }
+
+  .theme-light{
+    --bg: #f8f8f8;
+    --text: #1f2937;
+    --chart-start: #ffffff;
+    --chart-end: #ffffff;
+    --card-start: rgba(250,250,252,1);
+    --card-end: #ffffff;
+    --muted: #6b7280;
+    --legend-bg: rgba(255,255,255,0.9);
+  }
+
+  body { font-family: "Microsoft YaHei", sans-serif; background: var(--bg); margin:0; padding:0; color: var(--text);}
+  #chart { background: linear-gradient(180deg,var(--chart-start),var(--chart-end)); margin: 10px auto; width: 98vw; height: 1400px; position: relative;}
   svg { display: block; margin: auto; background: transparent; box-shadow: 0 8px 30px rgba(0,0,0,0.6);} 
   .tooltip {
     position: absolute; background: rgba(0,0,0,0.9); color: white;
@@ -27,8 +60,8 @@
     ry: 5;
   }
   .legend {
-    font-size: 13px; user-select:none; color: #e6eef8;
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 8px;
+    font-size: 13px; user-select:none; color: var(--text);
+    background: var(--legend-bg); border: 1px solid rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 8px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.6);
     position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
     display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; z-index: 30;
@@ -47,11 +80,11 @@
   }
   .legend-color.major { border-width: 2px; }
   text.axis-label {
-    font-size: 14px; fill: #cbd5e1;
+    font-size: 14px; fill: var(--muted);
   }
   h2 {
     text-align:center; margin:10px 0; padding-top: 80px;
-    font-size: 24px; color: #e6eef8;
+    font-size: 24px; color: var(--text);
   }
   .civilization-path {
     stroke-width: 8; opacity: 0.7; cursor: pointer;
@@ -85,16 +118,16 @@
   .industrial-bg {
     opacity: 0.1;
   }
-  /* 说明区样式（优化 UI - 暗色主题） */
+  /* 说明区样式（优化 UI） */
   #explanation{
-    background: linear-gradient(180deg, rgba(7,16,26,0.95), rgba(6,12,20,0.98));
+    background: linear-gradient(180deg, var(--card-start), var(--card-end));
     margin:24px auto 48px; padding:22px 26px; border-radius:12px; max-width:1100px;
-    box-shadow:0 12px 30px rgba(0,0,0,0.6); color:#e6eef8; line-height:1.7; font-size:16px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.6); color:var(--text); line-height:1.7; font-size:16px;
   }
   #explanation .ex-hero{display:flex;gap:14px;align-items:flex-start}
   #explanation .ex-hero .ex-icon{font-size:34px;line-height:1}
   #explanation .ex-hero .ex-title{font-size:20px;font-weight:700;color:#0f172a;margin:0}
-  #explanation .ex-hero .ex-sub{color:#cbd5e1;margin:6px 0 0}
+  #explanation .ex-hero .ex-sub{color:var(--muted);margin:6px 0 0}
   #explanation h4{margin:14px 0 8px;color:#0b66c2;font-size:16px}
   #explanation .ex-grid{display:grid;grid-template-columns:1fr;gap:12px}
   @media(min-width:900px){#explanation .ex-grid{grid-template-columns:1fr 1fr}}
@@ -108,6 +141,9 @@
   /* 关于按钮样式 */
   #about-btn{position:fixed;right:18px;top:74px;background:#0b66c2;color:#fff;border:none;padding:8px 12px;border-radius:8px;box-shadow:0 6px 18px rgba(11,102,194,0.18);cursor:pointer;z-index:40}
   @media(max-width:640px){#about-btn{right:12px;top:76px;padding:8px 10px;font-size:14px}}
+  /* 主题切换按钮 */
+  #theme-toggle{position:fixed;right:110px;top:74px;background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.08);padding:6px 10px;border-radius:8px;cursor:pointer;z-index:40}
+  @media(max-width:640px){#theme-toggle{right:96px;top:76px;padding:6px 8px;font-size:13px}}
 </style>
 </head>
 <body>
@@ -146,6 +182,8 @@
 </div>
 <!-- 顶部关于按钮 -->
 <button id="about-btn" aria-label="关于本图" title="关于本图">关于</button>
+<!-- 主题切换按钮 -->
+<button id="theme-toggle" aria-label="切换主题" title="切换主题">亮/暗</button>
 <div id="chart"></div>
 <div class="tooltip" id="tooltip" style="opacity:0;"></div>
 <script>
@@ -773,6 +811,40 @@
       }
     });
   }
+})();
+</script>
+<script>
+// 主题切换：保存到 localStorage，切换 body class
+(function(){
+  const themeBtn = document.getElementById('theme-toggle');
+  const root = document.body;
+  function applyTheme(t){
+    if(t === 'dark'){
+      root.classList.remove('theme-light');
+      root.classList.add('theme-dark');
+      themeBtn.textContent = '亮/暗';
+    } else {
+      root.classList.remove('theme-dark');
+      root.classList.add('theme-light');
+      themeBtn.textContent = '亮/暗';
+    }
+    try{ localStorage.setItem('site-theme', t); }catch(e){}
+  }
+
+  // 初始化：优先使用 localStorage，其次检测 prefers-color-scheme
+  let saved = null;
+  try{ saved = localStorage.getItem('site-theme'); }catch(e){}
+  if(!saved){
+    if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) saved = 'dark';
+    else saved = 'light';
+  }
+  applyTheme(saved);
+
+  themeBtn.addEventListener('click', ()=>{
+    const now = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+    const next = now === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+  });
 })();
 </script>
 </body>
